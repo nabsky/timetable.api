@@ -1,4 +1,4 @@
-package ru.nabsky.config;
+package ru.nabsky.router;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
@@ -10,10 +10,8 @@ import ru.nabsky.helper.SecurityHelper;
 import ru.nabsky.models.Team;
 import ru.nabsky.models.Token;
 import ru.nabsky.models.Unit;
-import ru.nabsky.models.ValidationResult;
 import ru.nabsky.services.TeamService;
 import spark.Request;
-import spark.Response;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -28,11 +26,11 @@ import java.util.Set;
 import static spark.Spark.*;
 import static spark.Spark.halt;
 
-public class WebConfig {
+public class HTTPRouter {
 
     private Injector injector;
 
-    public WebConfig(Injector injector) {
+    public HTTPRouter(Injector injector) {
         this.injector = injector;
         staticFileLocation("/public");
         setupRoutes();
