@@ -3,6 +3,7 @@ package ru.nabsky.models;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import spark.utils.StringUtils;
 
 @Data
 @JsonIgnoreProperties({"type", "_rev", "valid"})
@@ -20,7 +21,12 @@ public class Unit {
     private String workLength;
     private String breakLength;
 
-    public boolean isValid() {
-        return name != null;
+    public ValidationResult validate() {
+        if(StringUtils.isEmpty(name)){
+            return new ValidationResult("Unit name cannot be empty");
+        }
+
+        return new ValidationResult();
     }
+
 }

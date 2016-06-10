@@ -1,10 +1,18 @@
 package ru.nabsky.services;
 
 import ru.nabsky.models.Team;
+import ru.nabsky.models.Unit;
+
+import java.util.List;
 
 public interface TeamService {
 
-    String create(Team team);
+    String createTeam(Team team);
+    String createUnit(Team team, Unit unit);
 
-    boolean exists(String name);
+    boolean isTeamExists(String name);
+
+    Team getTeamByTokenId(String tokenId);
+
+    List<Unit> getUnits(Team team);
 }

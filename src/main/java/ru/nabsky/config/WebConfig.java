@@ -9,11 +9,13 @@ import ru.nabsky.helper.JSONHelper;
 import ru.nabsky.helper.SecurityHelper;
 import ru.nabsky.models.Team;
 import ru.nabsky.models.Token;
+import ru.nabsky.models.Unit;
 import ru.nabsky.models.ValidationResult;
 import ru.nabsky.services.TeamService;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static spark.Spark.*;
@@ -41,6 +43,9 @@ public class WebConfig {
             if (token == null || token.isExpired()) {
                 halt(HttpStatus.FORBIDDEN_403, "Forbidden");
             }
+            TeamService teamService = injector.getInstance(TeamService.class);
+            Team team = teamService.getTeamByTokenId(tokenId);
+            request.attribute("team", team);
         });
 
         post("/api/public/login", (request, response) -> {
@@ -74,6 +79,8 @@ public class WebConfig {
             return json;
         });
 
+        //========================= T E A M S =================================
+
         post("/api/public/teams", (request, response) -> {
             Map<String, String> data = new HashMap<String, String>();
             response.type("application/json");
@@ -96,25 +103,70 @@ public class WebConfig {
             }
 
             ValidationResult validationResult = team.validate();
-            if(!validationResult.isValid()){
+            if (!validationResult.isValid()) {
                 data.put("error", validationResult.getErrorMessage());
                 return JSONHelper.dataToJson(data);
             }
 
             TeamService teamService = injector.getInstance(TeamService.class);
-            if (teamService.exists(team.getName())) {
+            if (teamService.isTeamExists(team.getName())) {
                 response.status(HttpStatus.CONFLICT_409);
                 data.put("error", "Team name is already used");
                 return JSONHelper.dataToJson(data);
             }
 
-            String teamId = teamService.create(team);
+            String teamId = teamService.createTeam(team);
             DatabaseHelper.updateDesignDocuments(team.getName());
             data.put("id", teamId);
             response.status(HttpStatus.CREATED_201);
             return JSONHelper.dataToJson(data);
         });
 
+        //========================= U N I T S =================================
+        get("/api/protected/units", (request, response) -> {
+            Team team = (Team) request.attribute("team");
+            TeamService teamService = injector.getInstance(TeamService.class);
+            List<Unit> units = teamService.getUnits(team);
+            response.status(HttpStatus.OK_200);
+            response.type("application/json");
+            return JSONHelper.dataToJson(units);
+        });
+
+        post("/api/protected/units", (request, response) -> {
+            Map<String, String> data = new HashMap<String, String>();
+            response.type("application/json");
+
+            Team team = (Team) request.attribute("team");
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            Unit unit = null;
+            try {
+                unit = mapper.readValue(request.body(), Unit.class);
+            } catch (IOException e) {
+                response.status(HttpStatus.UNPROCESSABLE_ENTITY_422);
+                data.put("error", "Unit data is not valid");
+                return JSONHelper.dataToJson(data);
+            }
+
+            if (unit == null) {
+                response.status(HttpStatus.UNPROCESSABLE_ENTITY_422);
+                data.put("error", "Unit data is not valid");
+                return JSONHelper.dataToJson(data);
+            }
+
+            ValidationResult validationResult = unit.validate();
+            if (!validationResult.isValid()) {
+                data.put("error", validationResult.getErrorMessage());
+                return JSONHelper.dataToJson(data);
+            }
+
+            TeamService teamService = injector.getInstance(TeamService.class);
+            String unitId = teamService.createUnit(team, unit);
+            data.put("id", unitId);
+            response.status(HttpStatus.CREATED_201);
+            return JSONHelper.dataToJson(data);
+        });
 
     }
 

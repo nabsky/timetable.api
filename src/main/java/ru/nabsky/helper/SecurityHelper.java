@@ -18,7 +18,8 @@ public class SecurityHelper {
 
     public static String extractTokenId(Request request){
         String authorizationHeader = request.headers("Authorization");
-        if(!authorizationHeader.contains("Bearer ")){
+
+        if(authorizationHeader == null || !authorizationHeader.contains("Bearer ")){
             return null;
         };
         String token = authorizationHeader.replace("Bearer ", "");
