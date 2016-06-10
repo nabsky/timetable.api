@@ -3,9 +3,12 @@ package ru.nabsky.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
 import org.eclipse.jetty.http.HttpStatus;
+import ru.nabsky.dao.TokenDAO;
 import ru.nabsky.helper.DatabaseHelper;
 import ru.nabsky.helper.JSONHelper;
+import ru.nabsky.helper.SecurityHelper;
 import ru.nabsky.models.Team;
+import ru.nabsky.models.Token;
 import ru.nabsky.models.ValidationResult;
 import ru.nabsky.services.TeamService;
 
@@ -13,8 +16,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static spark.Spark.post;
-import static spark.Spark.staticFileLocation;
+import static spark.Spark.*;
+import static spark.Spark.halt;
 
 public class WebConfig {
 
@@ -27,6 +30,49 @@ public class WebConfig {
     }
 
     private void setupRoutes() {
+
+        before("/api/protected/*", (request, response) -> {
+            String tokenId = SecurityHelper.extractTokenId(request);
+            if (tokenId == null) {
+                halt(HttpStatus.FORBIDDEN_403, "Forbidden");
+            }
+            TokenDAO tokenDAO = injector.getInstance(TokenDAO.class);
+            Token token = tokenDAO.findById(tokenId);
+            if (token == null || token.isExpired()) {
+                halt(HttpStatus.FORBIDDEN_403, "Forbidden");
+            }
+        });
+
+        post("/api/public/login", (request, response) -> {
+            Map<String, Object> data = JSONHelper.jsonToData(request.body());
+            if (!data.containsKey("team") || !data.containsKey("password")) {
+                response.status(HttpStatus.UNAUTHORIZED_401);
+                return "";
+            }
+            String team = data.get("team").toString();
+            String password = data.get("password").toString();
+
+            if (team == null || password == null) {
+                response.status(HttpStatus.UNAUTHORIZED_401);
+                return "";
+            }
+
+            TokenDAO tokenDAO = injector.getInstance(TokenDAO.class);
+            Token token = tokenDAO.getToken(team, password);
+            if (token == null) {
+                response.status(HttpStatus.UNAUTHORIZED_401);
+                return "";
+            }
+            response.status(HttpStatus.OK_200);
+            response.type("application/json");
+
+            Map<String, Object> resultData = new HashMap<String, Object>();
+            resultData.put("tokenId", token.get_id());
+            resultData.put("teamId", token.getTeamId());
+            resultData.put("isLead", token.isLeadMode());
+            String json = JSONHelper.dataToJson(resultData);
+            return json;
+        });
 
         post("/api/public/teams", (request, response) -> {
             Map<String, String> data = new HashMap<String, String>();
@@ -68,6 +114,8 @@ public class WebConfig {
             response.status(HttpStatus.CREATED_201);
             return JSONHelper.dataToJson(data);
         });
+
+
     }
 
 }

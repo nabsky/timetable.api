@@ -33,29 +33,30 @@ public class TokenDAOCouchDBImpl extends CommonDAOCouchDBImpl<Token> implements 
         }
     }
 
-
-    //TODO refactor split in separate methods - check, find or create
-    public Token getToken(String teamName, String password){
+    public Token getToken(String teamName, String password) {
         String secret = SecurityHelper.getSecret(password);
         TeamDAO teamDAO = new TeamDAOCouchDBImpl();
         Team team = teamDAO.findByName(teamName);
-        if(team == null){
+        if (team == null) {
             return null;
         }
 
         String teamId = team.get_id();
         boolean leadMode = false;
 
-        if(secret.equals(team.getMatePassword())){
+        if (secret.equals(team.getMatePassword())) {
             leadMode = false;
-        } else if(secret.equals(team.getLeadPassword())){
+        } else if (secret.equals(team.getLeadPassword())) {
             leadMode = true;
         } else {
             return null;
         }
         Token token = findTokenByTeamId(teamId, leadMode);
 
-        if(token == null){
+        if (token == null || token.isExpired()) {
+            if (token != null) {
+                delete(token);
+            }
             token = new Token();
             token.setTeamId(teamId);
             token.setLeadMode(leadMode);

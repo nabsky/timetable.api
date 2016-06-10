@@ -36,6 +36,10 @@ public class Team {
             return new ValidationResult("Team name cannot be empty");
         }
 
+        if(StringUtils.isEmpty(email)){
+            return new ValidationResult("Email cannot be empty");
+        }
+
         if(StringUtils.isEmpty(matePassword)){
             return new ValidationResult("User password cannot be empty");
         }

@@ -20,4 +20,8 @@ public class Token {
 
     private String teamId;
     private boolean leadMode;
+
+    public boolean isExpired() {
+        return expirationDate.before(new Date());
+    }
 }
