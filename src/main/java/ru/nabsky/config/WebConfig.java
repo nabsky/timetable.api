@@ -13,10 +13,15 @@ import ru.nabsky.models.Unit;
 import ru.nabsky.models.ValidationResult;
 import ru.nabsky.services.TeamService;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static spark.Spark.*;
 import static spark.Spark.halt;
@@ -96,12 +101,6 @@ public class WebConfig {
                 return JSONHelper.dataToJson(data);
             }
 
-            if (team == null) {
-                response.status(HttpStatus.UNPROCESSABLE_ENTITY_422);
-                data.put("error", "Team data is not valid");
-                return JSONHelper.dataToJson(data);
-            }
-
             ValidationResult validationResult = team.validate();
             if (!validationResult.isValid()) {
                 data.put("error", validationResult.getErrorMessage());
@@ -149,15 +148,12 @@ public class WebConfig {
                 return JSONHelper.dataToJson(data);
             }
 
-            if (unit == null) {
-                response.status(HttpStatus.UNPROCESSABLE_ENTITY_422);
-                data.put("error", "Unit data is not valid");
-                return JSONHelper.dataToJson(data);
-            }
+            ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+            Validator validator = factory.getValidator();
+            Set<ConstraintViolation<Unit>> violations = validator.validate(unit);
 
-            ValidationResult validationResult = unit.validate();
-            if (!validationResult.isValid()) {
-                data.put("error", validationResult.getErrorMessage());
+            if(!violations.isEmpty()){
+                data.put("error", violations.iterator().next().getMessage());
                 return JSONHelper.dataToJson(data);
             }
 
