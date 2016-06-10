@@ -6,6 +6,7 @@ import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
 import spark.utils.StringUtils;
 
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
 
 @Data
@@ -18,20 +19,12 @@ public class Unit {
     private String _id;
     private String _rev;
 
-    @NotNull(message="Unit name cannot be empty")
-    @NotBlank(message="Unit name cannot be empty")
+    @NotNull(message="Name cannot be empty")
+    @NotBlank(message="Name cannot be empty")
     private String name;
 
     private String startTime;
     private String workLength;
     private String breakLength;
-
-    public ValidationResult validate() {
-        if(StringUtils.isEmpty(name)){
-            return new ValidationResult("Unit name cannot be empty");
-        }
-
-        return new ValidationResult();
-    }
 
 }

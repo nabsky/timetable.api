@@ -94,9 +94,11 @@ public class WebConfig {
 
             Team team = (Team) extractObject(request, Team.class);
 
-            ValidationResult validationResult = team.validate();
-            if (!validationResult.isValid()) {
-                data.put("error", validationResult.getErrorMessage());
+            ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+            Validator validator = factory.getValidator();
+            Set<ConstraintViolation<Team>> violations = validator.validate(team);
+            if(!violations.isEmpty()){
+                data.put("error", violations.iterator().next().getMessage());
                 return JSONHelper.dataToJson(data);
             }
 
@@ -128,13 +130,12 @@ public class WebConfig {
             Team team = (Team) request.attribute("team");
             Unit unit = (Unit) extractObject(request, Unit.class);
 
-            ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-            Validator validator = factory.getValidator();
-            Set<ConstraintViolation<Unit>> violations = validator.validate(unit);
-
             Map<String, String> data = new HashMap<String, String>();
             response.type("application/json");
 
+            ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+            Validator validator = factory.getValidator();
+            Set<ConstraintViolation<Unit>> violations = validator.validate(unit);
             if(!violations.isEmpty()){
                 data.put("error", violations.iterator().next().getMessage());
                 return JSONHelper.dataToJson(data);

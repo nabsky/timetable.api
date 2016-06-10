@@ -3,7 +3,11 @@ package ru.nabsky.models;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import org.hibernate.validator.constraints.NotEmpty;
 import spark.utils.StringUtils;
+
+import javax.validation.constraints.AssertTrue;
+import javax.validation.constraints.NotNull;
 
 @Data
 @JsonIgnoreProperties({"type", "_rev", "valid"})
@@ -15,7 +19,11 @@ public class Team {
     private String _id;
     private String _rev;
 
+    @NotNull(message = "Name cannot be empty")
+    @NotEmpty(message = "Name cannot be empty")
     private String name;
+    @NotNull(message = "Email cannot be empty")
+    @NotEmpty(message = "Email cannot be empty")
     private String email;
 
     private String startTime;
@@ -28,34 +36,15 @@ public class Team {
     private Boolean checkRest;
     private Boolean checkVK;
 
+    @NotNull(message = "User password cannot be empty")
+    @NotEmpty(message = "User password cannot be empty")
     private String matePassword;
+    @NotNull(message = "Admin password cannot be empty")
+    @NotEmpty(message = "Admin password cannot be empty")
     private String leadPassword;
 
-    public ValidationResult validate() {
-        if(StringUtils.isEmpty(name)){
-            return new ValidationResult("Team name cannot be empty");
-        }
-
-        if(StringUtils.isEmpty(email)){
-            return new ValidationResult("Email cannot be empty");
-        }
-
-        if(StringUtils.isEmpty(matePassword)){
-            return new ValidationResult("User password cannot be empty");
-        }
-
-        if(StringUtils.isEmpty(leadPassword)){
-            return new ValidationResult("Admin password cannot be empty");
-        }
-
-        if(leadPassword.equals(matePassword)){
-            return new ValidationResult("User and Admin passwords cannot be equal");
-        }
-
-        if(!name.equals(name.toLowerCase())){
-            return new ValidationResult("Team name must be in lower case");
-        }
-
-        return new ValidationResult();
+    @AssertTrue(message = "User and Admin passwords cannot be equal")
+    private boolean isValid() {
+        return leadPassword == null || !leadPassword.equals(matePassword);
     }
 }
