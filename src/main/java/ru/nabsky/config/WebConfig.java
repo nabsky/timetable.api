@@ -12,6 +12,8 @@ import ru.nabsky.models.Token;
 import ru.nabsky.models.Unit;
 import ru.nabsky.models.ValidationResult;
 import ru.nabsky.services.TeamService;
+import spark.Request;
+import spark.Response;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -90,16 +92,7 @@ public class WebConfig {
             Map<String, String> data = new HashMap<String, String>();
             response.type("application/json");
 
-            ObjectMapper mapper = new ObjectMapper();
-
-            Team team = null;
-            try {
-                team = mapper.readValue(request.body(), Team.class);
-            } catch (IOException e) {
-                response.status(HttpStatus.UNPROCESSABLE_ENTITY_422);
-                data.put("error", "Team data is not valid");
-                return JSONHelper.dataToJson(data);
-            }
+            Team team = (Team) extractObject(request, Team.class);
 
             ValidationResult validationResult = team.validate();
             if (!validationResult.isValid()) {
@@ -132,25 +125,15 @@ public class WebConfig {
         });
 
         post("/api/protected/units", (request, response) -> {
-            Map<String, String> data = new HashMap<String, String>();
-            response.type("application/json");
-
             Team team = (Team) request.attribute("team");
-
-            ObjectMapper mapper = new ObjectMapper();
-
-            Unit unit = null;
-            try {
-                unit = mapper.readValue(request.body(), Unit.class);
-            } catch (IOException e) {
-                response.status(HttpStatus.UNPROCESSABLE_ENTITY_422);
-                data.put("error", "Unit data is not valid");
-                return JSONHelper.dataToJson(data);
-            }
+            Unit unit = (Unit) extractObject(request, Unit.class);
 
             ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
             Validator validator = factory.getValidator();
             Set<ConstraintViolation<Unit>> violations = validator.validate(unit);
+
+            Map<String, String> data = new HashMap<String, String>();
+            response.type("application/json");
 
             if(!violations.isEmpty()){
                 data.put("error", violations.iterator().next().getMessage());
@@ -164,6 +147,19 @@ public class WebConfig {
             return JSONHelper.dataToJson(data);
         });
 
+    }
+
+    private Object extractObject(Request request, Class clazz) {
+        ObjectMapper mapper = new ObjectMapper();
+        Object object = null;
+        try {
+            object = mapper.readValue(request.body(), clazz);
+        } catch (IOException e) {
+            Map<String, String> data = new HashMap<String, String>();
+            data.put("error", "Unprocessable entity");
+            halt(HttpStatus.UNPROCESSABLE_ENTITY_422, JSONHelper.dataToJson(data));
+        }
+        return object;
     }
 
 }
