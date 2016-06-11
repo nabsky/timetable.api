@@ -73,4 +73,10 @@ public class TeamServiceImpl implements TeamService{
         unit = unitDAO.findById(unit.get_id());
         return unit;
     }
+
+    @Override
+    public void deleteUnit(Team team, Unit unit) {
+        UnitDAO unitDAO = unitDAOFactory.create(team.getName());
+        unitDAO.delete(unit);
+    }
 }

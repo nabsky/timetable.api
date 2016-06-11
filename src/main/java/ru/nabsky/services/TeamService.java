@@ -19,4 +19,6 @@ public interface TeamService {
     Unit findUnit(Team team, String id);
 
     Unit updateUnit(Team team, Unit unit);
+
+    void deleteUnit(Team team, Unit unit);
 }

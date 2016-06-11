@@ -151,13 +151,17 @@ public class HTTPRouter {
         put("/api/protected/units/:unitId", (request, response) -> {
             Team team = (Team) request.attribute("team");
             Unit unit = (Unit) extractObject(request, Unit.class);
-
             Map<String, String> data = new HashMap<String, String>();
             response.type("application/json");
 
             TeamService teamService = injector.getInstance(TeamService.class);
             String unitId = request.params(":unitId");
             Unit update = teamService.findUnit(team, unitId);
+            if(update == null){
+                response.status(HttpStatus.NOT_FOUND_404);
+                data.put("error", "Unit with id = " + unitId + " is not found");
+                return JSONHelper.dataToJson(data);
+            }
             unit.set_id(update.get_id());
             unit.set_rev(update.get_rev());
             BeanUtils.copyProperties(update, unit);
@@ -175,6 +179,24 @@ public class HTTPRouter {
             return JSONHelper.dataToJson(unit);
         });
 
+        delete("/api/protected/units/:unitId", (request, response) -> {
+            String unitId = request.params(":unitId");
+            Team team = (Team) request.attribute("team");
+            Map<String, String> data = new HashMap<String, String>();
+            response.type("application/json");
+
+            TeamService teamService = injector.getInstance(TeamService.class);
+            Unit delete = teamService.findUnit(team, unitId);
+            if(delete == null){
+                response.status(HttpStatus.NOT_FOUND_404);
+                data.put("error", "Unit with id = " + unitId + " is not found");
+                return JSONHelper.dataToJson(data);
+            }
+
+            teamService.deleteUnit(team, delete);
+            response.status(HttpStatus.OK_200);
+            return "{}";
+        });
 
     }
 
