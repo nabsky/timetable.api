@@ -58,4 +58,19 @@ public class TeamServiceImpl implements TeamService{
         List<Unit> units = unitDAO.findAll();
         return units;
     }
+
+    @Override
+    public Unit findUnit(Team team, String id) {
+        UnitDAO unitDAO = unitDAOFactory.create(team.getName());
+        Unit unit = unitDAO.findById(id);
+        return unit;
+    }
+
+    @Override
+    public Unit updateUnit(Team team, Unit unit) {
+        UnitDAO unitDAO = unitDAOFactory.create(team.getName());
+        unitDAO.update(unit);
+        unit = unitDAO.findById(unit.get_id());
+        return unit;
+    }
 }

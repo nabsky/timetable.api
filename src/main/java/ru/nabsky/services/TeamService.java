@@ -15,4 +15,8 @@ public interface TeamService {
     Team getTeamByTokenId(String tokenId);
 
     List<Unit> getUnits(Team team);
+
+    Unit findUnit(Team team, String id);
+
+    Unit updateUnit(Team team, Unit unit);
 }

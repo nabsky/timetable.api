@@ -4,9 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
-import spark.utils.StringUtils;
-
-import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
 
 @Data

@@ -2,6 +2,8 @@ package ru.nabsky.router;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.BeanUtilsBean;
 import org.eclipse.jetty.http.HttpStatus;
 import ru.nabsky.dao.TokenDAO;
 import ru.nabsky.helper.DatabaseHelper;
@@ -11,6 +13,7 @@ import ru.nabsky.models.Team;
 import ru.nabsky.models.Token;
 import ru.nabsky.models.Unit;
 import ru.nabsky.services.TeamService;
+import ru.nabsky.utils.NullAwareBeanUtilsBean;
 import spark.Request;
 
 import javax.validation.ConstraintViolation;
@@ -146,6 +149,32 @@ public class HTTPRouter {
             return JSONHelper.dataToJson(data);
         });
 
+        put("/api/protected/units", (request, response) -> {
+            Team team = (Team) request.attribute("team");
+            Unit unit = (Unit) extractObject(request, Unit.class);
+
+            Map<String, String> data = new HashMap<String, String>();
+            response.type("application/json");
+
+            TeamService teamService = injector.getInstance(TeamService.class);
+            Unit update = teamService.findUnit(team, unit.get_id());
+            BeanUtilsBean notNull = new NullAwareBeanUtilsBean();
+            notNull.copyProperties(update, unit);
+
+            ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+            Validator validator = factory.getValidator();
+            Set<ConstraintViolation<Unit>> violations = validator.validate(update);
+            if(!violations.isEmpty()){
+                data.put("error", violations.iterator().next().getMessage());
+                return JSONHelper.dataToJson(data);
+            }
+
+            unit = teamService.updateUnit(team, update);
+            response.status(HttpStatus.CREATED_201);
+            return JSONHelper.dataToJson(unit);
+        });
+
+
     }
 
     private Object extractObject(Request request, Class clazz) {
@@ -155,7 +184,7 @@ public class HTTPRouter {
             object = mapper.readValue(request.body(), clazz);
         } catch (IOException e) {
             Map<String, String> data = new HashMap<String, String>();
-            data.put("error", "Unprocessable entity");
+            data.put("error", "Unprocessable entity: " + e.getLocalizedMessage());
             halt(HttpStatus.UNPROCESSABLE_ENTITY_422, JSONHelper.dataToJson(data));
         }
         return object;
