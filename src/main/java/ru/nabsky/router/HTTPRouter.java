@@ -13,7 +13,6 @@ import ru.nabsky.models.Team;
 import ru.nabsky.models.Token;
 import ru.nabsky.models.Unit;
 import ru.nabsky.services.TeamService;
-import ru.nabsky.utils.NullAwareBeanUtilsBean;
 import spark.Request;
 
 import javax.validation.ConstraintViolation;
@@ -149,7 +148,7 @@ public class HTTPRouter {
             return JSONHelper.dataToJson(data);
         });
 
-        put("/api/protected/units", (request, response) -> {
+        put("/api/protected/units/:unitId", (request, response) -> {
             Team team = (Team) request.attribute("team");
             Unit unit = (Unit) extractObject(request, Unit.class);
 
@@ -157,9 +156,11 @@ public class HTTPRouter {
             response.type("application/json");
 
             TeamService teamService = injector.getInstance(TeamService.class);
-            Unit update = teamService.findUnit(team, unit.get_id());
-            BeanUtilsBean notNull = new NullAwareBeanUtilsBean();
-            notNull.copyProperties(update, unit);
+            String unitId = request.params(":unitId");
+            Unit update = teamService.findUnit(team, unitId);
+            unit.set_id(update.get_id());
+            unit.set_rev(update.get_rev());
+            BeanUtils.copyProperties(update, unit);
 
             ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
             Validator validator = factory.getValidator();
@@ -170,7 +171,7 @@ public class HTTPRouter {
             }
 
             unit = teamService.updateUnit(team, update);
-            response.status(HttpStatus.CREATED_201);
+            response.status(HttpStatus.OK_200);
             return JSONHelper.dataToJson(unit);
         });
 
