@@ -3,7 +3,6 @@ package ru.nabsky.router;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.beanutils.BeanUtilsBean;
 import org.eclipse.jetty.http.HttpStatus;
 import ru.nabsky.dao.TokenDAO;
 import ru.nabsky.helper.DatabaseHelper;
@@ -26,8 +25,9 @@ import java.util.Map;
 import java.util.Set;
 
 import static spark.Spark.*;
-import static spark.Spark.halt;
 
+
+//TODO refactor: http://www.deadcoderising.com/sparkjava-separating-routing-and-resources/
 public class HTTPRouter {
 
     private Injector injector;
