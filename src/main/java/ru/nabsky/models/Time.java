@@ -1,26 +1,30 @@
 package ru.nabsky.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import javax.validation.constraints.NotNull;
 
 @Data
 @JsonIgnoreProperties({"type", "_rev"})
-public class Time {
-
+@EqualsAndHashCode(callSuper = true)
+public class Time extends CouchDBModel {
     @SuppressWarnings("unused")
     private final String Type = "Time";
 
-    @JsonProperty("id")
-    private String _id;
-    private String _rev;
-
+    @NotNull(message = "Start cannot be empty")
     private Long start;
     private Long end;
 
     private TimeMode mode;
 
+    @NotNull(message = "MateId cannot be empty")
+    @NotEmpty(message = "MateId cannot be empty")
     private String mateId;
+    @NotNull(message = "DayId cannot be empty")
+    @NotEmpty(message = "DayId cannot be empty")
     private String dayId;
 
     private String photoStart;

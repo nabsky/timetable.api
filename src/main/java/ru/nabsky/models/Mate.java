@@ -1,20 +1,24 @@
 package ru.nabsky.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import javax.validation.constraints.NotNull;
 
 @Data
-@JsonIgnoreProperties({"type", "_rev", "valid"})
-public class Mate {
+@JsonIgnoreProperties({"type", "_rev"})
+@EqualsAndHashCode(callSuper = true)
+public class Mate extends CouchDBModel {
     @SuppressWarnings("unused")
     private final String Type = "Mate";
 
-    @JsonProperty("id")
-    private String _id;
-    private String _rev;
-
+    @NotNull(message = "Name cannot be empty")
+    @NotEmpty(message = "Name cannot be empty")
     private String name;
+    @NotNull(message = "Surname cannot be empty")
+    @NotEmpty(message = "Surname cannot be empty")
     private String surname;
 
     private String birthday;
@@ -28,7 +32,4 @@ public class Mate {
 
     private String unitId;
 
-    public boolean isValid() {
-        return name != null && surname != null;
-    }
 }

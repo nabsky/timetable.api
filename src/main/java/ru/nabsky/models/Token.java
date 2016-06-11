@@ -1,20 +1,17 @@
 package ru.nabsky.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.Date;
 
 @Data
-@JsonIgnoreProperties({"type", "_rev"})
-public class Token {
+@JsonIgnoreProperties({"type", "expired", "_rev"})
+@EqualsAndHashCode(callSuper = true)
+public class Token extends CouchDBModel {
     @SuppressWarnings("unused")
     private final String Type = "Token";
-
-    @JsonProperty("id")
-    private String _id;
-    private String _rev;
 
     private Date expirationDate;
 
