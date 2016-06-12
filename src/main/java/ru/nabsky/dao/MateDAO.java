@@ -8,4 +8,6 @@ public interface MateDAO extends CommonDAO<Mate>{
 
     List<Mate> findByUnitId(String unitId);
 
+    List<Mate> findAllByName();
+
 }

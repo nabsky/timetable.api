@@ -201,16 +201,10 @@ public class HTTPRouter {
         get("/api/protected/mates", (request, response) -> {
             Team team = (Team) request.attribute("team");
             TeamService teamService = injector.getInstance(TeamService.class);
-            Integer page = request.queryMap("page").integerValue();
-            Integer perPage = request.queryMap("per_page").integerValue();
-            List<Mate> mates = teamService.getMates(team, page, perPage);
-            Integer count = teamService.getMatesCount(team);
+            List<Mate> mates = teamService.getMates(team);
             response.status(HttpStatus.OK_200);
             response.type("application/json");
-            Map<String, Object> data = new HashMap<String, Object>();
-            data.put("result", mates);
-            data.put("total", count);
-            return JSONHelper.dataToJson(data);
+            return JSONHelper.dataToJson(mates);
         });
 
         post("/api/protected/mates", (request, response) -> {
@@ -284,7 +278,6 @@ public class HTTPRouter {
             response.status(HttpStatus.OK_200);
             return "{}";
         });
-
 
     }
 

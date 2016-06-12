@@ -93,6 +93,17 @@ public abstract class CommonDAOCouchDBImpl<T> implements CommonDAO<T> {
     }
 
     @Override
+    public List<T> findAll() {
+        List<T> models = getConnection().view("common/by_type")
+                .key(getGenericTypeClass().getSimpleName())
+                .reduce(false)
+                .includeDocs(true)
+                .query(getGenericTypeClass());
+        closeConnection();
+        return models;
+    }
+
+    @Override
     public List<T> findAll(Integer limit, Integer skip) {
         List<T> models = getConnection().view("common/by_type")
                 .key(getGenericTypeClass().getSimpleName())

@@ -25,4 +25,13 @@ public class MateDAOCouchDBImpl extends CommonDAOCouchDBImpl<Mate> implements Ma
         closeConnection();
         return mates;
     }
+
+    @Override
+    public List<Mate> findAllByName() {
+        List<Mate> mates = getConnection().view("mates/by_name")
+                .includeDocs(true)
+                .query(Mate.class);
+        closeConnection();
+        return mates;
+    }
 }

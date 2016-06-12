@@ -90,6 +90,12 @@ public class TeamServiceImpl implements TeamService {
         return mateId;
     }
 
+    @Override
+    public List<Mate> getMates(Team team) {
+        MateDAO mateDAO = mateDAOFactory.create(team.getName());
+        List<Mate> mates = mateDAO.findAllByName();
+        return mates;
+    }
 
     @Override
     public List<Mate> getMates(Team team, Integer page, Integer perPage) {

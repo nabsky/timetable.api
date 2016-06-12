@@ -12,6 +12,8 @@ public interface CommonDAO<T> {
 
     void delete(T object);
 
+    List<T> findAll();
+
     List<T> findAll(Integer limit, Integer skip);
 
     Integer getTotalCount();
