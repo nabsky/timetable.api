@@ -16,7 +16,7 @@ import ru.nabsky.services.TeamService;
 
 import java.util.List;
 
-public class TeamServiceImpl implements TeamService{
+public class TeamServiceImpl implements TeamService {
 
     @Inject
     private TeamDAO teamDAO;
@@ -94,6 +94,15 @@ public class TeamServiceImpl implements TeamService{
     public List<Mate> getMates(Team team) {
         MateDAO mateDAO = mateDAOFactory.create(team.getName());
         List<Mate> mates = mateDAO.findAll();
+        return mates;
+    }
+
+    @Override
+    public List<Mate> getMates(Team team, Integer page, Integer perPage) {
+        MateDAO mateDAO = mateDAOFactory.create(team.getName());
+        Integer limit = perPage != null ? perPage : 20;
+        Integer skip = page != null ? page * limit : 0;
+        List<Mate> mates = mateDAO.findAll(limit, skip);
         return mates;
     }
 

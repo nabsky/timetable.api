@@ -96,7 +96,7 @@ public class HTTPRouter {
             ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
             Validator validator = factory.getValidator();
             Set<ConstraintViolation<Team>> violations = validator.validate(team);
-            if(!violations.isEmpty()){
+            if (!violations.isEmpty()) {
                 data.put("error", violations.iterator().next().getMessage());
                 return JSONHelper.dataToJson(data);
             }
@@ -135,7 +135,7 @@ public class HTTPRouter {
             ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
             Validator validator = factory.getValidator();
             Set<ConstraintViolation<Unit>> violations = validator.validate(unit);
-            if(!violations.isEmpty()){
+            if (!violations.isEmpty()) {
                 data.put("error", violations.iterator().next().getMessage());
                 return JSONHelper.dataToJson(data);
             }
@@ -156,7 +156,7 @@ public class HTTPRouter {
             TeamService teamService = injector.getInstance(TeamService.class);
             String unitId = request.params(":unitId");
             Unit update = teamService.findUnit(team, unitId);
-            if(update == null){
+            if (update == null) {
                 response.status(HttpStatus.NOT_FOUND_404);
                 data.put("error", "Unit with id = " + unitId + " is not found");
                 return JSONHelper.dataToJson(data);
@@ -168,7 +168,7 @@ public class HTTPRouter {
             ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
             Validator validator = factory.getValidator();
             Set<ConstraintViolation<Unit>> violations = validator.validate(update);
-            if(!violations.isEmpty()){
+            if (!violations.isEmpty()) {
                 data.put("error", violations.iterator().next().getMessage());
                 return JSONHelper.dataToJson(data);
             }
@@ -186,7 +186,7 @@ public class HTTPRouter {
 
             TeamService teamService = injector.getInstance(TeamService.class);
             Unit delete = teamService.findUnit(team, unitId);
-            if(delete == null){
+            if (delete == null) {
                 response.status(HttpStatus.NOT_FOUND_404);
                 data.put("error", "Unit with id = " + unitId + " is not found");
                 return JSONHelper.dataToJson(data);
@@ -201,7 +201,9 @@ public class HTTPRouter {
         get("/api/protected/mates", (request, response) -> {
             Team team = (Team) request.attribute("team");
             TeamService teamService = injector.getInstance(TeamService.class);
-            List<Mate> mates = teamService.getMates(team);
+            Integer page = request.queryMap("page").integerValue();
+            Integer perPage = request.queryMap("per_page").integerValue();
+            List<Mate> mates = teamService.getMates(team, page, perPage);
             response.status(HttpStatus.OK_200);
             response.type("application/json");
             return JSONHelper.dataToJson(mates);
@@ -278,8 +280,6 @@ public class HTTPRouter {
             response.status(HttpStatus.OK_200);
             return "{}";
         });
-
-
 
 
     }

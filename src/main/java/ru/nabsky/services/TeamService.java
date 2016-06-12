@@ -27,6 +27,8 @@ public interface TeamService {
 
     List<Mate> getMates(Team team);
 
+    List<Mate> getMates(Team team, Integer page, Integer perPage);
+
     Mate findMate(Team team, String mateId);
 
     Mate updateMate(Team team, Mate mate);
