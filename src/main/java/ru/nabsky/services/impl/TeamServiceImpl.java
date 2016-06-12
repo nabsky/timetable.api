@@ -1,13 +1,14 @@
 package ru.nabsky.services.impl;
 
 import com.google.inject.Inject;
+import ru.nabsky.dao.MateDAO;
 import ru.nabsky.dao.TeamDAO;
 import ru.nabsky.dao.TokenDAO;
 import ru.nabsky.dao.UnitDAO;
+import ru.nabsky.dao.factories.MateDAOFactory;
 import ru.nabsky.dao.factories.UnitDAOFactory;
-import ru.nabsky.dao.impl.TeamDAOCouchDBImpl;
-import ru.nabsky.helper.DatabaseHelper;
 import ru.nabsky.helper.SecurityHelper;
+import ru.nabsky.models.Mate;
 import ru.nabsky.models.Team;
 import ru.nabsky.models.Token;
 import ru.nabsky.models.Unit;
@@ -23,6 +24,8 @@ public class TeamServiceImpl implements TeamService{
     private TokenDAO tokenDAO;
     @Inject
     private UnitDAOFactory unitDAOFactory;
+    @Inject
+    private MateDAOFactory mateDAOFactory;
 
 
     @Override
@@ -78,5 +81,40 @@ public class TeamServiceImpl implements TeamService{
     public void deleteUnit(Team team, Unit unit) {
         UnitDAO unitDAO = unitDAOFactory.create(team.getName());
         unitDAO.delete(unit);
+    }
+
+    @Override
+    public String createMate(Team team, Mate mate) {
+        MateDAO mateDAO = mateDAOFactory.create(team.getName());
+        String mateId = mateDAO.insert(mate);
+        return mateId;
+    }
+
+    @Override
+    public List<Mate> getMates(Team team) {
+        MateDAO mateDAO = mateDAOFactory.create(team.getName());
+        List<Mate> mates = mateDAO.findAll();
+        return mates;
+    }
+
+    @Override
+    public Mate findMate(Team team, String mateId) {
+        MateDAO mateDAO = mateDAOFactory.create(team.getName());
+        Mate mate = mateDAO.findById(mateId);
+        return mate;
+    }
+
+    @Override
+    public Mate updateMate(Team team, Mate mate) {
+        MateDAO mateDAO = mateDAOFactory.create(team.getName());
+        mateDAO.update(mate);
+        mate = mateDAO.findById(mate.get_id());
+        return mate;
+    }
+
+    @Override
+    public void deleteMate(Team team, Mate mate) {
+        MateDAO mateDAO = mateDAOFactory.create(team.getName());
+        mateDAO.delete(mate);
     }
 }

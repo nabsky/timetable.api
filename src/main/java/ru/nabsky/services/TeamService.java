@@ -1,5 +1,6 @@
 package ru.nabsky.services;
 
+import ru.nabsky.models.Mate;
 import ru.nabsky.models.Team;
 import ru.nabsky.models.Unit;
 
@@ -21,4 +22,14 @@ public interface TeamService {
     Unit updateUnit(Team team, Unit unit);
 
     void deleteUnit(Team team, Unit unit);
+
+    String createMate(Team team, Mate mate);
+
+    List<Mate> getMates(Team team);
+
+    Mate findMate(Team team, String mateId);
+
+    Mate updateMate(Team team, Mate mate);
+
+    void deleteMate(Team team, Mate mate);
 }

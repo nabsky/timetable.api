@@ -8,6 +8,7 @@ import ru.nabsky.dao.TokenDAO;
 import ru.nabsky.helper.DatabaseHelper;
 import ru.nabsky.helper.JSONHelper;
 import ru.nabsky.helper.SecurityHelper;
+import ru.nabsky.models.Mate;
 import ru.nabsky.models.Team;
 import ru.nabsky.models.Token;
 import ru.nabsky.models.Unit;
@@ -26,8 +27,6 @@ import java.util.Set;
 
 import static spark.Spark.*;
 
-
-//TODO refactor: http://www.deadcoderising.com/sparkjava-separating-routing-and-resources/
 public class HTTPRouter {
 
     private Injector injector;
@@ -197,6 +196,91 @@ public class HTTPRouter {
             response.status(HttpStatus.OK_200);
             return "{}";
         });
+
+        //========================= M A T E S =================================
+        get("/api/protected/mates", (request, response) -> {
+            Team team = (Team) request.attribute("team");
+            TeamService teamService = injector.getInstance(TeamService.class);
+            List<Mate> mates = teamService.getMates(team);
+            response.status(HttpStatus.OK_200);
+            response.type("application/json");
+            return JSONHelper.dataToJson(mates);
+        });
+
+        post("/api/protected/mates", (request, response) -> {
+            Team team = (Team) request.attribute("team");
+            Mate mate = (Mate) extractObject(request, Mate.class);
+
+            Map<String, String> data = new HashMap<String, String>();
+            response.type("application/json");
+
+            ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+            Validator validator = factory.getValidator();
+            Set<ConstraintViolation<Mate>> violations = validator.validate(mate);
+            if (!violations.isEmpty()) {
+                data.put("error", violations.iterator().next().getMessage());
+                return JSONHelper.dataToJson(data);
+            }
+
+            TeamService teamService = injector.getInstance(TeamService.class);
+            String mateId = teamService.createMate(team, mate);
+            data.put("id", mateId);
+            response.status(HttpStatus.CREATED_201);
+            return JSONHelper.dataToJson(data);
+        });
+
+        put("/api/protected/mates/:mateId", (request, response) -> {
+            Team team = (Team) request.attribute("team");
+            Mate mate = (Mate) extractObject(request, Mate.class);
+            Map<String, String> data = new HashMap<String, String>();
+            response.type("application/json");
+
+            TeamService teamService = injector.getInstance(TeamService.class);
+            String mateId = request.params(":mateId");
+            Mate update = teamService.findMate(team, mateId);
+            if (update == null) {
+                response.status(HttpStatus.NOT_FOUND_404);
+                data.put("error", "Mate with id = " + mateId + " is not found");
+                return JSONHelper.dataToJson(data);
+            }
+            mate.set_id(update.get_id());
+            mate.set_rev(update.get_rev());
+            BeanUtils.copyProperties(update, mate);
+
+            ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+            Validator validator = factory.getValidator();
+            Set<ConstraintViolation<Mate>> violations = validator.validate(update);
+            if (!violations.isEmpty()) {
+                data.put("error", violations.iterator().next().getMessage());
+                return JSONHelper.dataToJson(data);
+            }
+
+            mate = teamService.updateMate(team, update);
+            response.status(HttpStatus.OK_200);
+            return JSONHelper.dataToJson(mate);
+        });
+
+        delete("/api/protected/mates/:mateId", (request, response) -> {
+            String mateId = request.params(":mateId");
+            Team team = (Team) request.attribute("team");
+            Map<String, String> data = new HashMap<String, String>();
+            response.type("application/json");
+
+            TeamService teamService = injector.getInstance(TeamService.class);
+            Mate delete = teamService.findMate(team, mateId);
+            if (delete == null) {
+                response.status(HttpStatus.NOT_FOUND_404);
+                data.put("error", "Mate with id = " + mateId + " is not found");
+                return JSONHelper.dataToJson(data);
+            }
+
+            teamService.deleteMate(team, delete);
+            response.status(HttpStatus.OK_200);
+            return "{}";
+        });
+
+
+
 
     }
 
