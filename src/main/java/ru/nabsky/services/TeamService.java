@@ -25,8 +25,6 @@ public interface TeamService {
 
     String createMate(Team team, Mate mate);
 
-    List<Mate> getMates(Team team);
-
     List<Mate> getMates(Team team, Integer page, Integer perPage);
 
     Mate findMate(Team team, String mateId);
@@ -34,4 +32,6 @@ public interface TeamService {
     Mate updateMate(Team team, Mate mate);
 
     void deleteMate(Team team, Mate mate);
+
+    Integer getMatesCount(Team team);
 }

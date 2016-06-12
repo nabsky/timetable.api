@@ -7,6 +7,7 @@ import org.lightcouch.NoDocumentException;
 import ru.nabsky.dao.CommonDAO;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.List;
 import java.util.logging.Level;
 
 @Log
@@ -89,5 +90,28 @@ public abstract class CommonDAOCouchDBImpl<T> implements CommonDAO<T> {
     public void delete(T object) {
         getConnection().remove(object);
         closeConnection();
+    }
+
+    @Override
+    public List<T> findAll(Integer limit, Integer skip) {
+        List<T> models = getConnection().view("common/by_type")
+                .key(getGenericTypeClass().getSimpleName())
+                .limit(limit)
+                .skip(skip)
+                .reduce(false)
+                .includeDocs(true)
+                .query(getGenericTypeClass());
+        closeConnection();
+        return models;
+    }
+
+    @Override
+    public Integer getTotalCount() {
+        Integer count = getConnection().view("common/by_type")
+                .key(getGenericTypeClass().getSimpleName())
+                .reduce(true)
+                .queryForInt();
+        closeConnection();
+        return count;
     }
 }

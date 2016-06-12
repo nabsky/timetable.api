@@ -17,27 +17,6 @@ public class MateDAOCouchDBImpl extends CommonDAOCouchDBImpl<Mate> implements Ma
     }
 
     @Override
-    public List<Mate> findAll() {
-        List<Mate> mates = getConnection().view("mates/by_name")
-                .includeDocs(true)
-                .query(Mate.class);
-        closeConnection();
-        return mates;
-    }
-
-    @Override
-    public List<Mate> findAll(Integer limit, Integer skip) {
-        List<Mate> mates = getConnection().view("mates/by_name")
-                .limit(limit)
-                .skip(skip)
-                .reduce(false)
-                .includeDocs(true)
-                .query(Mate.class);
-        closeConnection();
-        return mates;
-    }
-
-    @Override
     public List<Mate> findByUnitId(String unitId) {
         List<Mate> mates = getConnection().view("mates/by_unit")
                 .key(unitId)
