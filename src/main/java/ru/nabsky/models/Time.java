@@ -15,8 +15,8 @@ public class Time extends CouchDBModel {
     private final String Type = "Time";
 
     @NotNull(message = "Start cannot be empty")
-    private Long start;
-    private Long end;
+    private Integer[] start;
+    private Integer[] length;
 
     private TimeMode mode;
 

@@ -16,59 +16,15 @@ public class Day extends CouchDBModel {
 
     private Integer[] date;
 
-    private Long secondsLate;
-    private Long secondsFromDayStart;
+    private Integer[] late;
+    private Integer[] start;
 
-    private Long workTime;
-    private Long breakTime;
-    private Long sickTime;
-    private Long tripTime;
-    private Long restTime;
+    private Integer[] workTime;
+    private Integer[] breakTime;
 
     private boolean fault;
 
     @NotNull(message = "MateId cannot be empty")
     @NotEmpty(message = "MateId cannot be empty")
     private String mateId;
-
-    public void addTimeLength(Time time) {
-        long length = time.getEnd() - time.getStart();
-        switch (time.getMode()) {
-            case WORK:
-                if (workTime == null) {
-                    workTime = length;
-                } else {
-                    workTime += length;
-                }
-                break;
-            case BREAK:
-                if (breakTime == null) {
-                    breakTime = length;
-                } else {
-                    breakTime += length;
-                }
-                break;
-            case SICK:
-                if (sickTime == null) {
-                    sickTime = length;
-                } else {
-                    sickTime += length;
-                }
-                break;
-            case TRIP:
-                if (tripTime == null) {
-                    tripTime = length;
-                } else {
-                    tripTime += length;
-                }
-                break;
-            case REST:
-                if (restTime == null) {
-                    restTime = length;
-                } else {
-                    restTime += length;
-                }
-                break;
-        }
-    }
 }
