@@ -3,7 +3,6 @@ package ru.nabsky.module;
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import ru.nabsky.dao.*;
-import ru.nabsky.dao.factories.DayDAOFactory;
 import ru.nabsky.dao.factories.MateDAOFactory;
 import ru.nabsky.dao.factories.TimeDAOFactory;
 import ru.nabsky.dao.factories.UnitDAOFactory;
@@ -26,10 +25,6 @@ public class BindingModule extends AbstractModule {
         install(new FactoryModuleBuilder()
                 .implement(TimeDAO.class, TimeDAOCouchDBImpl.class)
                 .build(TimeDAOFactory.class));
-
-        install(new FactoryModuleBuilder()
-                .implement(DayDAO.class, DayDAOCouchDBImpl.class)
-                .build(DayDAOFactory.class));
 
         bind(TeamDAO.class).to(TeamDAOCouchDBImpl.class);
 

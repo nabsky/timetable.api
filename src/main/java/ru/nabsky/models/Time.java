@@ -18,14 +18,15 @@ public class Time extends CouchDBModel {
     private Integer[] start;
     private Integer[] length;
 
+    private Integer[] late;
+    private boolean first;
+    private boolean fault;
+
     private TimeMode mode;
 
     @NotNull(message = "MateId cannot be empty")
     @NotEmpty(message = "MateId cannot be empty")
     private String mateId;
-    @NotNull(message = "DayId cannot be empty")
-    @NotEmpty(message = "DayId cannot be empty")
-    private String dayId;
 
     private String photoStart;
     private String photoEnd;
