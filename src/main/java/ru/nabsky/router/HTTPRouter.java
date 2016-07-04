@@ -29,6 +29,21 @@ import static spark.Spark.*;
 
 public class HTTPRouter {
 
+    private static final String APPLICATION_JSON                = "application/json";
+
+    private static final String ROUTE_PROTECTED_MASK            = "/api/protected/*";
+
+    private static final String ROUTE_LOGIN                     = "/api/public/login";
+    private static final String ROUTE_REGISTER                  = "/api/public/teams";
+
+    private static final String ROUTE_UNITS                     = "/api/protected/units";
+    private static final String UNIT_ID_PARAM                   = ":unitId";
+    private static final String ROUTE_UNITS_WITH_UNIT_ID_PARAM  = ROUTE_UNITS + "/" + UNIT_ID_PARAM;
+
+    private static final String ROUTE_MATES                     = "/api/protected/mates";
+    private static final String MATE_ID_PARAM                   = ":mateId";
+    private static final String ROUTE_MATES_WITH_MATE_ID_PARAM = ROUTE_MATES + "/" + MATE_ID_PARAM;
+
     private Injector injector;
 
     public HTTPRouter(Injector injector) {
@@ -39,7 +54,7 @@ public class HTTPRouter {
 
     private void setupRoutes() {
 
-        before("/api/protected/*", (request, response) -> {
+        before(ROUTE_PROTECTED_MASK, (request, response) -> {
             String tokenId = SecurityHelper.extractTokenId(request);
             if (tokenId == null) {
                 halt(HttpStatus.FORBIDDEN_403, "Forbidden");
@@ -54,7 +69,7 @@ public class HTTPRouter {
             request.attribute("team", team);
         });
 
-        post("/api/public/login", (request, response) -> {
+        post(ROUTE_LOGIN, (request, response) -> {
             Map<String, Object> data = JSONHelper.jsonToData(request.body());
             if (!data.containsKey("team") || !data.containsKey("password")) {
                 response.status(HttpStatus.UNAUTHORIZED_401);
@@ -75,7 +90,7 @@ public class HTTPRouter {
                 return "";
             }
             response.status(HttpStatus.OK_200);
-            response.type("application/json");
+            response.type(APPLICATION_JSON);
 
             Map<String, Object> resultData = new HashMap<String, Object>();
             resultData.put("tokenId", token.get_id());
@@ -87,9 +102,9 @@ public class HTTPRouter {
 
         //========================= T E A M S =================================
 
-        post("/api/public/teams", (request, response) -> {
+        post(ROUTE_REGISTER, (request, response) -> {
             Map<String, String> data = new HashMap<String, String>();
-            response.type("application/json");
+            response.type(APPLICATION_JSON);
 
             Team team = (Team) extractObject(request, Team.class);
 
@@ -116,21 +131,21 @@ public class HTTPRouter {
         });
 
         //========================= U N I T S =================================
-        get("/api/protected/units", (request, response) -> {
+        get(ROUTE_UNITS, (request, response) -> {
             Team team = (Team) request.attribute("team");
             TeamService teamService = injector.getInstance(TeamService.class);
             List<Unit> units = teamService.getUnits(team);
             response.status(HttpStatus.OK_200);
-            response.type("application/json");
+            response.type(APPLICATION_JSON);
             return JSONHelper.dataToJson(units);
         });
 
-        post("/api/protected/units", (request, response) -> {
+        post(ROUTE_UNITS, (request, response) -> {
             Team team = (Team) request.attribute("team");
             Unit unit = (Unit) extractObject(request, Unit.class);
 
             Map<String, String> data = new HashMap<String, String>();
-            response.type("application/json");
+            response.type(APPLICATION_JSON);
 
             ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
             Validator validator = factory.getValidator();
@@ -147,14 +162,14 @@ public class HTTPRouter {
             return JSONHelper.dataToJson(data);
         });
 
-        put("/api/protected/units/:unitId", (request, response) -> {
+        put(ROUTE_UNITS_WITH_UNIT_ID_PARAM, (request, response) -> {
             Team team = (Team) request.attribute("team");
             Unit unit = (Unit) extractObject(request, Unit.class);
             Map<String, String> data = new HashMap<String, String>();
-            response.type("application/json");
+            response.type(APPLICATION_JSON);
 
             TeamService teamService = injector.getInstance(TeamService.class);
-            String unitId = request.params(":unitId");
+            String unitId = request.params(UNIT_ID_PARAM);
             Unit update = teamService.findUnit(team, unitId);
             if (update == null) {
                 response.status(HttpStatus.NOT_FOUND_404);
@@ -178,11 +193,11 @@ public class HTTPRouter {
             return JSONHelper.dataToJson(unit);
         });
 
-        delete("/api/protected/units/:unitId", (request, response) -> {
-            String unitId = request.params(":unitId");
+        delete(ROUTE_UNITS_WITH_UNIT_ID_PARAM, (request, response) -> {
+            String unitId = request.params(UNIT_ID_PARAM);
             Team team = (Team) request.attribute("team");
             Map<String, String> data = new HashMap<String, String>();
-            response.type("application/json");
+            response.type(APPLICATION_JSON);
 
             TeamService teamService = injector.getInstance(TeamService.class);
             Unit delete = teamService.findUnit(team, unitId);
@@ -198,21 +213,21 @@ public class HTTPRouter {
         });
 
         //========================= M A T E S =================================
-        get("/api/protected/mates", (request, response) -> {
+        get(ROUTE_MATES, (request, response) -> {
             Team team = (Team) request.attribute("team");
             TeamService teamService = injector.getInstance(TeamService.class);
             List<Mate> mates = teamService.getMates(team);
             response.status(HttpStatus.OK_200);
-            response.type("application/json");
+            response.type(APPLICATION_JSON);
             return JSONHelper.dataToJson(mates);
         });
 
-        post("/api/protected/mates", (request, response) -> {
+        post(ROUTE_MATES, (request, response) -> {
             Team team = (Team) request.attribute("team");
             Mate mate = (Mate) extractObject(request, Mate.class);
 
             Map<String, String> data = new HashMap<String, String>();
-            response.type("application/json");
+            response.type(APPLICATION_JSON);
 
             ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
             Validator validator = factory.getValidator();
@@ -229,14 +244,14 @@ public class HTTPRouter {
             return JSONHelper.dataToJson(data);
         });
 
-        put("/api/protected/mates/:mateId", (request, response) -> {
+        put(ROUTE_MATES_WITH_MATE_ID_PARAM, (request, response) -> {
             Team team = (Team) request.attribute("team");
             Mate mate = (Mate) extractObject(request, Mate.class);
             Map<String, String> data = new HashMap<String, String>();
-            response.type("application/json");
+            response.type(APPLICATION_JSON);
 
             TeamService teamService = injector.getInstance(TeamService.class);
-            String mateId = request.params(":mateId");
+            String mateId = request.params(MATE_ID_PARAM);
             Mate update = teamService.findMate(team, mateId);
             if (update == null) {
                 response.status(HttpStatus.NOT_FOUND_404);
@@ -260,11 +275,11 @@ public class HTTPRouter {
             return JSONHelper.dataToJson(mate);
         });
 
-        delete("/api/protected/mates/:mateId", (request, response) -> {
-            String mateId = request.params(":mateId");
+        delete(ROUTE_MATES_WITH_MATE_ID_PARAM, (request, response) -> {
+            String mateId = request.params(MATE_ID_PARAM);
             Team team = (Team) request.attribute("team");
             Map<String, String> data = new HashMap<String, String>();
-            response.type("application/json");
+            response.type(APPLICATION_JSON);
 
             TeamService teamService = injector.getInstance(TeamService.class);
             Mate delete = teamService.findMate(team, mateId);
