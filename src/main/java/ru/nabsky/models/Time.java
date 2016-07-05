@@ -11,6 +11,9 @@ import javax.validation.constraints.NotNull;
 @JsonIgnoreProperties({"type", "_rev"})
 @EqualsAndHashCode(callSuper = true)
 public class Time extends CouchDBModel {
+    public enum TimeMode {
+        WORK, BREAK
+    }
     @SuppressWarnings("unused")
     private final String Type = "Time";
 
