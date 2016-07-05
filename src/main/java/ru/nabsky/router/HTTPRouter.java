@@ -95,7 +95,7 @@ public class HTTPRouter {
             Map<String, Object> resultData = new HashMap<String, Object>();
             resultData.put("tokenId", token.get_id());
             resultData.put("teamId", token.getTeamId());
-            resultData.put("isLead", token.isLeadMode());
+            resultData.put("mode", token.getMode());
             String json = JSONHelper.dataToJson(resultData);
             return json;
         });

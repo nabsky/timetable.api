@@ -10,13 +10,16 @@ import java.util.Date;
 @JsonIgnoreProperties({"type", "expired", "_rev"})
 @EqualsAndHashCode(callSuper = true)
 public class Token extends CouchDBModel {
+    public enum TokenMode {
+        LEAD, MATE
+    }
     @SuppressWarnings("unused")
     private final String Type = "Token";
 
     private Date expirationDate;
 
     private String teamId;
-    private boolean leadMode;
+    private TokenMode mode;
 
     public boolean isExpired() {
         return expirationDate.before(new Date());

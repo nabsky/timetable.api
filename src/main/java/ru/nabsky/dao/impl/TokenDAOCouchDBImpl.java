@@ -20,9 +20,9 @@ public class TokenDAOCouchDBImpl extends CommonDAOCouchDBImpl<Token> implements 
     }
 
     @Override
-    public Token findTokenByTeamId(String teamId, Boolean leadMode) {
+    public Token findTokenByTeamId(String teamId, Token.TokenMode tokenMode) {
         List<Token> tokens = getConnection().view("tokens/by_team")
-                .key(teamId, leadMode)
+                .key(teamId, tokenMode)
                 .includeDocs(true)
                 .query(Token.class);
         closeConnection();
@@ -42,16 +42,16 @@ public class TokenDAOCouchDBImpl extends CommonDAOCouchDBImpl<Token> implements 
         }
 
         String teamId = team.get_id();
-        boolean leadMode = false;
+        Token.TokenMode tokenMode;
 
         if (secret.equals(team.getMatePassword())) {
-            leadMode = false;
+            tokenMode = Token.TokenMode.MATE;
         } else if (secret.equals(team.getLeadPassword())) {
-            leadMode = true;
+            tokenMode = Token.TokenMode.LEAD;
         } else {
             return null;
         }
-        Token token = findTokenByTeamId(teamId, leadMode);
+        Token token = findTokenByTeamId(teamId, tokenMode);
 
         if (token == null || token.isExpired()) {
             if (token != null) {
@@ -59,7 +59,7 @@ public class TokenDAOCouchDBImpl extends CommonDAOCouchDBImpl<Token> implements 
             }
             token = new Token();
             token.setTeamId(teamId);
-            token.setLeadMode(leadMode);
+            token.setMode(tokenMode);
             String tokenId = insert(token);
             token = findById(tokenId);
         }
